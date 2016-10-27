@@ -154,7 +154,7 @@ UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDele
             } else if let URL = URL(string: imageURL), let data = try? Data(contentsOf: URL) {
                 cell.imageView?.image = UIImage.init(data: data)
             }
-            cell.textLabel?.text = "sent by: " + name!
+            cell.textLabel?.text = "sent by " + name!
         } else {
             let text = message[Constants.MessageFields.text] as String!
             cell.textLabel?.text = name! + ": " + text!
@@ -261,5 +261,6 @@ UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDele
             alert.addAction(dismissAction)
             self.present(alert, animated: true, completion: nil)
         }
-}
+    }
+    
 }
