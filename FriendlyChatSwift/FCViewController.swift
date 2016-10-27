@@ -142,11 +142,26 @@ UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDele
         let messageSnapshot: FIRDataSnapshot! = self.messages[indexPath.row]
         let message = messageSnapshot.value as! Dictionary<String, String>
         let name = message[Constants.MessageFields.name] as String!
-        let text = message[Constants.MessageFields.text] as String!
-        cell.textLabel?.text = name! + ": " + text!
-        cell.imageView?.image = UIImage(named: "ic_account_circle")
-        if let photoURL = message[Constants.MessageFields.photoURL], let URL = URL(string: photoURL), let data = try? Data(contentsOf: URL) {
-            cell.imageView?.image = UIImage(data: data)
+        if let imageURL = message[Constants.MessageFields.imageURL] {
+            if imageURL.hasPrefix("gs://") {
+                FIRStorage.storage().reference(forURL: imageURL).data(withMaxSize: INT64_MAX){ (data, error) in
+                    if let error = error {
+                        print("Error downloading: \(error)")
+                        return
+                    }
+                    cell.imageView?.image = UIImage.init(data: data!)
+                }
+            } else if let URL = URL(string: imageURL), let data = try? Data(contentsOf: URL) {
+                cell.imageView?.image = UIImage.init(data: data)
+            }
+            cell.textLabel?.text = "sent by: \(name)"
+        } else {
+            let text = message[Constants.MessageFields.text] as String!
+            cell.textLabel?.text = name! + ": " + text!
+            cell.imageView?.image = UIImage(named: "ic_account_circle")
+            if let photoURL = message[Constants.MessageFields.photoURL], let URL = URL(string: photoURL), let data = try? Data(contentsOf: URL) {
+                cell.imageView?.image = UIImage(data: data)
+            }
         }
         return cell
     }
@@ -246,6 +261,5 @@ UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDele
             alert.addAction(dismissAction)
             self.present(alert, animated: true, completion: nil)
         }
-    }
-    
+}
 }
